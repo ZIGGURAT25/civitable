@@ -718,12 +718,29 @@
                 dataLoaded = true;
                 searchIndex = createSearchIndex();
                 render();
-                // Search functionality removed
-                // Any other initialization that depends on data
             } catch (error) {
-                console.error("Failed to fetch data:", error);
-                // Optionally, show an error message to the user
-                showLoading();
+                console.error("Initial fetch failed, trying cache...", error);
+                // If the initial fetch fails, try to get the data from the cache
+                const cache = await caches.open('timetable-data-v2');
+                const cachedResponse = await cache.match(DATA_URL);
+                if (cachedResponse) {
+                    console.log("Found data in cache, rendering from cache.");
+                    const data = await cachedResponse.json();
+                    courseData = data.courseData || {};
+                    timetableData = data.timetableData || {};
+                    dataLoaded = true;
+                    render();
+                } else {
+                    // If there's nothing in the cache either, show an offline message
+                    console.error("No cached data found. Displaying offline message.");
+                    hideLoading();
+                    timetableContainer.innerHTML = `
+                        <div class="text-center p-8 rounded-xl bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-600">
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200">You are offline</h3>
+                            <p class="text-gray-500 dark:text-gray-400 mt-2">Connect to the internet to load the schedule for the first time.</p>
+                        </div>
+                    `;
+                }
             }
         }
 

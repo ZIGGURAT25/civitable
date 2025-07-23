@@ -5,14 +5,10 @@
         const DEV_MODE = false; // Set to false to disable Dev Panel
     </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=portrait">
     <title>CiviTable</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
+    
+    <link rel="stylesheet" href="./dist/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -27,6 +23,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
         
         /* Custom scrollbar */
@@ -122,6 +119,7 @@
             max-width: 400px;
             transform: translateX(100%);
             transition: transform 0.3s ease-in-out;
+            will-change: transform;
         }
         
         .notification.show {
@@ -131,6 +129,7 @@
         /* Enhanced hover effects */
         .hover-lift {
             transition: all 0.2s ease-in-out;
+            will-change: transform, box-shadow;
         }
         
         .hover-lift:hover {
@@ -214,6 +213,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             z-index: 1;
+            will-change: transform;
         }
 
         .segmented-control[data-selected="CE23F14"]::before {
@@ -259,6 +259,7 @@
             .mobile-header {
                 margin: 0.5rem;
                 width: calc(100% - 1rem);
+                will-change: transform;
             }
 
             #mobile-schedule {
@@ -328,6 +329,7 @@
                 opacity: 0.4;
                 transform: scale(0.95);
                 transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+                will-change: opacity, transform;
             }
             .course-card-highlight-hover {
                 transform: scale(1.05) translateY(-2px);
@@ -335,6 +337,7 @@
                 border-color: rgba(59, 130, 246, 0.8);
                 z-index: 10;
                 position: relative;
+                will-change: transform, box-shadow, border-color;
             }
         }
 
@@ -388,6 +391,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             z-index: 1;
+            will-change: transform;
         }
         #view-switcher[data-view="calendar"]::before {
             transform: translateX(100%);
@@ -416,7 +420,32 @@
         .dark #view-switcher button.active {
             color: white;
         }
-    </style>
+      html, body {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  @media screen and (orientation:landscape) and (max-width: 768px) {
+    body::before {
+      content: 'Please rotate your device back to portrait mode.';
+      display: flex;
+      position: fixed;
+      z-index: 9999;
+      top: 0; left: 0; right: 0; bottom: 0;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+    #app, #main-content-container, .fade-in, .mobile-header, #timetable-container, #calendar-container {
+      filter: blur(2px) grayscale(0.6);
+      pointer-events: none;
+      user-select: none;
+    }
+  }
+</style>
   <base href="./">
   <link rel="manifest" href="./manifest.json">
 </head>
@@ -440,7 +469,6 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <!-- NEW: PWA install button in nav, appears after banner is closed -->
                     <button id="nav-install-pwa-btn" class="hidden flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-3 py-2 text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" title="Install App">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -502,7 +530,6 @@
                 </div>
             </div>
 
-            <!-- Elective Course Selector -->
             <div class="flex flex-col items-center my-8 fade-in">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="p-2 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-lg">
@@ -533,7 +560,6 @@
                 </div>
             </div>
             
-            <!-- View Switcher -->
             <div class="flex justify-center mb-8 fade-in">
                 <div id="view-switcher" class="w-full max-w-md shadow-lg" data-view="timetable">
                     <button data-view="timetable" class="active">Timetable</button>
@@ -554,17 +580,14 @@
                 <div id="calendar-container" class="hidden fade-in max-w-2xl mx-auto"></div>
             </div>
 
-            <!-- Course Details Dialog -->
             <div id="course-dialog" class="dialog">
                 <div class="dialog-backdrop" onclick="closeModal()"></div>
                 <div class="dialog-content">
-                    <!-- Content is dynamically inserted by JS -->
-                </div>
+                    </div>
             </div>
         </div>
     </div>
 
-    <!-- NEW: PWA Install Banner -->
     <div id="pwa-install-banner" class="hidden fixed bottom-0 inset-x-0 pb-4 px-4 z-50">
         <div class="max-w-xl mx-auto">
             <div class="p-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between flex-wrap gap-2">
@@ -855,12 +878,10 @@
                                 </span>
                             </div>
                             
-                            <!-- Icon for Desktop on hover -->
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden md:block">
                                 <path d="M7 17L17 7"></path><path d="M7 7h10v10"></path>
                             </svg>
 
-                            <!-- IMPROVED Chevron for Mobile, always visible -->
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="block md:hidden text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
@@ -1071,7 +1092,9 @@
                 </div>`;
 
             dialog.classList.add('open');
-            setTimeout(() => dialog.classList.add('visible'), 10);
+            requestAnimationFrame(() => {
+                dialog.classList.add('visible');
+            });
         }
 
         function closeModal() {
@@ -1283,4 +1306,10 @@
         </span>
     </footer>
 </body>
+<script>
+// Attempt to lock orientation to portrait on mobile devices
+if (window.screen.orientation && window.screen.orientation.lock) {
+    window.screen.orientation.lock('portrait').catch(()=>{});
+}
+</script>
 </html>

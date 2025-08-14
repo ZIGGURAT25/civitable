@@ -41,55 +41,107 @@
             background: rgba(75, 85, 99, 0.5);
         }
 
-        /* --- MODAL/DIALOG STYLES --- */
+        /* --- MODAL/DIALOG STYLES FOR ANIMATION --- */
         .dialog-backdrop {
             position: fixed;
             inset: 0;
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
             z-index: 50;
-            display: none;
             opacity: 0;
-            transition: opacity 200ms ease-in-out;
+            transition: opacity 300ms ease-in-out;
         }
         
         .dialog-content {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.95);
             background-color: white;
-            padding: 0; /* Padding is handled internally now */
-            border-radius: 1.5rem; /* Increased border-radius */
+            padding: 0;
+            border-radius: 1.5rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             z-index: 50;
             width: 90%;
-            max-width: 28rem; /* Adjusted max-width */
-            display: none;
+            max-width: 28rem;
             opacity: 0;
-            transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
-            will-change: opacity, transform;
-            overflow: hidden; /* To contain the rounded corners */
+            transition: all 350ms cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: opacity, transform, width, height, border-radius;
+            overflow: hidden;
         }
         .dark .dialog-content {
-            background-color: rgb(31, 41, 55); /* Tailwind gray-800 */
+            background-color: rgb(31, 41, 55);
             color: white;
-            border: 1px solid rgb(55, 65, 81); /* Tailwind gray-700 */
+            border: 1px solid rgb(55, 65, 81);
         }
 
-        .dialog.open .dialog-backdrop,
+        .dialog.open {
+            pointer-events: auto;
+        }
+        
+        .dialog.open .dialog-backdrop {
+            opacity: 1;
+        }
+        
         .dialog.open .dialog-content {
-            display: block;
-        }
-
-        .dialog.visible .dialog-backdrop {
             opacity: 1;
         }
-
-        .dialog.visible .dialog-content {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+        
+        .course-card-animating {
+            visibility: hidden !important;
         }
+
+        /* --- STAGGERED ANIMATION STYLES --- */
+        .modal-anim-item {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+        .modal-anim-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- TANGIBLE BUTTON FEEDBACK --- */
+        .button-press {
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .button-press:active, .button-press.pressed {
+             transform: scale(0.95);
+        }
+
+        /* --- ANIMATED STATE TRANSITIONS FOR FILTERING --- */
+        .course-card-wrapper {
+            transition: max-height 0.35s ease-in-out, margin-top 0.35s ease-in-out, margin-bottom 0.35s ease-in-out;
+            overflow: hidden;
+            max-height: 150px; /* Needs to be larger than the card's actual height */
+        }
+        .course-card-wrapper.hiding {
+            max-height: 0;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+        .course-card-container {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .course-card-wrapper.hiding .course-card-container {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+
+        /* --- CROSS-FADE MODAL ANIMATION --- */
+        .course-card-content, .modal-content-wrapper {
+            transition: opacity 0.2s ease-in-out;
+        }
+        .dialog.open .course-card-content {
+            opacity: 0;
+        }
+        .modal-content-wrapper {
+            opacity: 0;
+        }
+        .dialog.open .modal-content-wrapper {
+            opacity: 1;
+            transition-delay: 0.15s; /* Delay fade-in until modal is mostly expanded */
+        }
+
 
         /* Enhanced animations */
         .fade-in {
@@ -126,7 +178,7 @@
             transform: translateX(0);
         }
 
-        /* Enhanced hover effects */
+        /* --- CHANGE: Enhanced hover effects with glow --- */
         .hover-lift {
             transition: all 0.2s ease-in-out;
             will-change: transform, box-shadow;
@@ -134,28 +186,26 @@
         
         .hover-lift:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 15px rgba(59, 130, 246, 0.4);
         }
 
         .dark .hover-lift:hover {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 20px rgba(96, 165, 250, 0.5);
         }
 
-        /* Loading skeleton */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
+        /* --- CHANGE: Optimized Skeleton Loading --- */
+        .skeleton-card {
+            background-color: #e5e7eb;
+            border-radius: 0.75rem;
+            height: 4.5rem; /* h-18 */
+            opacity: 0;
+            animation: skeleton-fade-in 0.5s ease-out forwards;
         }
-        
-        .dark .skeleton {
-            background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
-            background-size: 200% 100%;
+        .dark .skeleton-card {
+            background-color: #374151;
         }
-        
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        @keyframes skeleton-fade-in {
+            to { opacity: 1; }
         }
 
         /* Pulse animation for notifications */
@@ -445,6 +495,20 @@
       user-select: none;
     }
   }
+
+  /* --- CHANGE: OFFLINE STATUS PILL --- */
+  #offline-status {
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+  }
+  #offline-status.visible {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+  }
+
 </style>
   <base href="./">
   <link rel="manifest" href="./manifest.json">
@@ -469,6 +533,12 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
+                    <!-- CHANGE: OFFLINE STATUS PILL ADDED -->
+                    <div id="offline-status" class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-200/50 dark:bg-gray-700/50 px-3 py-1.5 rounded-full">
+                        <div class="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
+                        <span class="font-semibold">Offline</span>
+                    </div>
+
                     <button id="nav-install-pwa-btn" class="hidden flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-3 py-2 text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" title="Install App">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -545,13 +615,13 @@
                 </div>
                 
                 <div class="segmented-control w-full max-w-md shadow-lg" id="elective-selector" data-selected="CE23C11">
-                    <div class="segmented-option active" data-value="CE23C11" id="option-CE23C11">
+                    <div class="segmented-option active button-press" data-value="CE23C11" id="option-CE23C11">
                         <div class="flex flex-col items-center gap-1">
                             <span class="font-bold text-xs sm:text-sm">CE23C11</span>
                             <span class="text-xs opacity-90 hidden sm:block">Advanced Construction</span>
                         </div>
                     </div>
-                    <div class="segmented-option" data-value="CE23F14" id="option-CE23F14">
+                    <div class="segmented-option button-press" data-value="CE23F14" id="option-CE23F14">
                         <div class="flex flex-col items-center gap-1">
                             <span class="font-bold text-xs sm:text-sm">CE23F14</span>
                             <span class="text-xs opacity-90 hidden sm:block">Urban Planning</span>
@@ -562,28 +632,21 @@
             
             <div class="flex justify-center mb-8 fade-in">
                 <div id="view-switcher" class="w-full max-w-md shadow-lg" data-view="timetable">
-                    <button data-view="timetable" class="active">Timetable</button>
-                    <button data-view="calendar">Calendar</button>
-                </div>
-            </div>
-
-            <div id="loading-skeleton" class="hidden">
-                <div class="space-y-4">
-                    <div class="skeleton h-16 rounded-xl"></div>
-                    <div class="skeleton h-32 rounded-xl"></div>
-                    <div class="skeleton h-48 rounded-xl"></div>
+                    <button data-view="timetable" class="active button-press">Timetable</button>
+                    <button data-view="calendar" class="button-press">Calendar</button>
                 </div>
             </div>
             
             <div id="main-content-container">
-                <div id="timetable-container" class="fade-in"></div>
-                <div id="calendar-container" class="hidden fade-in max-w-2xl mx-auto"></div>
+                <div id="timetable-container"></div>
+                <div id="calendar-container" class="hidden"></div>
             </div>
 
-            <div id="course-dialog" class="dialog">
+            <div id="course-dialog" class="dialog fixed inset-0 z-50 pointer-events-none">
                 <div class="dialog-backdrop" onclick="closeModal()"></div>
                 <div class="dialog-content">
-                    </div>
+                    <!-- Content will be injected by JS -->
+                </div>
             </div>
         </div>
     </div>
@@ -619,6 +682,19 @@
         </div>
     </div>
     
+    <!-- UPDATE NOTIFICATION -->
+    <div id="update-notification" class="hidden fixed bottom-6 right-6 z-50 transform transition-transform duration-300 translate-y-20">
+        <div class="p-4 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 flex items-center gap-4">
+            <p class="font-semibold text-gray-800 dark:text-white">
+                A new version is available!
+            </p>
+            <button id="reload-button" class="flex-shrink-0 px-5 py-2 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                Reload
+            </button>
+        </div>
+    </div>
+    <!-- END UPDATE NOTIFICATION -->
+
     <script>
         // --- ENHANCED THEME MANAGEMENT ---
         let themeState = {
@@ -674,16 +750,16 @@
         // See data.js for courseData, timetableData, and lastUpdatedDate.
         // These are now attached to the window object for global access.
 
-        // --- COURSE COLORS (Moved back for Tailwind safelisting) ---
+        // --- IMPROVED COURSE COLORS FOR LIGHT MODE ---
         const courseColors = {
-            CE23512: "bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-yellow-200 dark:border-yellow-700 text-yellow-900 dark:text-yellow-200",
-            CE23513: "bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-700 text-red-900 dark:text-red-200",
-            DM1: "bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 border-indigo-200 dark:border-indigo-700 text-indigo-900 dark:text-indigo-200",
-            CE23531: "bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 border-teal-200 dark:border-teal-700 text-teal-900 dark:text-teal-200",
-            CE23511: "bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 border-pink-200 dark:border-pink-700 text-pink-900 dark:text-pink-200",
-            CE23C11: "bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-blue-200",
-            CE23F14: "bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700 text-purple-900 dark:text-purple-200",
-            CE23521: "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700 text-green-900 dark:text-green-200",
+            CE23512: "bg-gradient-to-br from-yellow-100 to-yellow-200 border-yellow-300 text-yellow-800 dark:from-yellow-900/30 dark:to-yellow-800/30 dark:border-yellow-700 dark:text-yellow-200",
+            CE23513: "bg-gradient-to-br from-red-100 to-red-200 border-red-300 text-red-800 dark:from-red-900/30 dark:to-red-800/30 dark:border-red-700 dark:text-red-200",
+            DM1: "bg-gradient-to-br from-indigo-100 to-indigo-200 border-indigo-300 text-indigo-800 dark:from-indigo-900/30 dark:to-indigo-800/30 dark:border-indigo-700 dark:text-indigo-200",
+            CE23531: "bg-gradient-to-br from-teal-100 to-teal-200 border-teal-300 text-teal-800 dark:from-teal-900/30 dark:to-teal-800/30 dark:border-teal-700 dark:text-teal-200",
+            CE23511: "bg-gradient-to-br from-pink-100 to-pink-200 border-pink-300 text-pink-800 dark:from-pink-900/30 dark:to-pink-800/30 dark:border-pink-700 dark:text-pink-200",
+            CE23C11: "bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 text-blue-800 dark:from-blue-900/30 dark:to-blue-800/30 dark:border-blue-700 dark:text-blue-200",
+            CE23F14: "bg-gradient-to-br from-purple-100 to-purple-200 border-purple-300 text-purple-800 dark:from-purple-900/30 dark:to-purple-800/30 dark:border-purple-700 dark:text-purple-200",
+            CE23521: "bg-gradient-to-br from-green-100 to-green-200 border-green-300 text-green-800 dark:from-green-900/30 dark:to-green-800/30 dark:border-green-700 dark:text-green-200",
         };
 
 
@@ -693,11 +769,12 @@
             isMobile: window.innerWidth <= 768,
             touchStart: null,
             touchEnd: null,
-            isLoading: false,
+            isLoading: true, // Start in loading state
             selectedElective: 'CE23C11',
             view: 'timetable',
             selectedDate: new Date(),
-            transitionDirection: 'none' // 'none', 'next', 'prev'
+            transitionDirection: 'none',
+            clickedCard: null
         };
 
         // --- UTILITY FUNCTIONS ---
@@ -706,7 +783,6 @@
             return (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
         }
 
-        // --- UPDATED: getTypeIcon returns SVG instead of emoji ---
         function getTypeIcon(type) {
             const iconClass = "w-4 h-4 inline-block";
             switch (type) {
@@ -757,7 +833,6 @@
             const lastUpdatedElement = document.getElementById('last-updated');
             if (!lastUpdatedElement) return;
 
-            // Get the last updated date from data.js
             const lastUpdatedDate = new Date(window.lastUpdatedDate); 
             const now = new Date();
             const diffSeconds = Math.floor((now - lastUpdatedDate) / 1000);
@@ -781,20 +856,19 @@
             lastUpdatedElement.textContent = relativeTime;
         }
 
-        // --- NEW: Haptic Feedback for Native Feel ---
         function triggerHapticFeedback(intensity = 5) {
             if (navigator.vibrate) {
-                navigator.vibrate(intensity); // A short, subtle vibration
+                navigator.vibrate(intensity);
             }
         }
 
         // --- DOM ELEMENTS ---
         const timetableContainer = document.getElementById('timetable-container');
         const calendarContainer = document.getElementById('calendar-container');
-        const loadingSkeleton = document.getElementById('loading-skeleton');
         const dialog = document.getElementById('course-dialog');
+        const dialogContent = dialog.querySelector('.dialog-content');
 
-        // --- ENHANCED RENDERING LOGIC ---
+        // --- RENDERING LOGIC ---
         function render() {
             updateViewSwitcher();
 
@@ -810,45 +884,77 @@
         }
 
         function renderTimetableView() {
-            showLoading();
-            timetableContainer.innerHTML = '';
+            const data = { days: timetableData.days, schedule: timetableData.schedule };
             
-            const data = getFilteredTimetableData();
-            
-            if (state.isMobile) {
-                timetableContainer.innerHTML = MobileView(data);
+            // CHANGE: Optimized Skeleton Loading
+            if (state.isLoading) {
+                if (state.isMobile) {
+                    timetableContainer.innerHTML = MobileSkeletonView(data);
+                } else {
+                    timetableContainer.innerHTML = DesktopSkeletonView(data);
+                }
             } else {
-                timetableContainer.innerHTML = DesktopView(data);
+                if (state.isMobile) {
+                    timetableContainer.innerHTML = MobileView(data);
+                } else {
+                    timetableContainer.innerHTML = DesktopView(data);
+                }
+                attachEventListeners();
             }
-            attachEventListeners();
-            hideLoading();
         }
+
+        // --- CHANGE: New Skeleton View Functions ---
+        function MobileSkeletonView(data) {
+            const dayName = data.days[state.currentDay];
+            const daySchedule = data.schedule[dayName] || [];
+            return `<div class="space-y-6 animate-pulse">
+                        <div class="flex items-center justify-between bg-gray-200 dark:bg-gray-700/50 rounded-2xl p-5 h-[92px] mobile-header"></div>
+                        <div class="flex justify-center space-x-1 sm:space-x-2">
+                            ${data.days.map(() => `<div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700/50"></div>`).join('')}
+                        </div>
+                        <div class="space-y-4">
+                            ${daySchedule.map((slot, index) => `
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-24 text-right pt-3">
+                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                                        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="skeleton-card" style="animation-delay: ${index * 75}ms"></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+        }
+
+        function DesktopSkeletonView(data) {
+             const maxPeriods = Math.max(0, ...Object.values(data.schedule).map(daySchedule => daySchedule.length));
+             let bodyHtml = '';
+             for (let i = 0; i < maxPeriods; i++) {
+                 let rowHtml = data.days.map((day, dayIndex) => `
+                    <div class="p-3 min-h-[100px] desktop-timetable-grid-cell">
+                        <div class="skeleton-card" style="animation-delay: ${ (i * 7 + dayIndex) * 25}ms"></div>
+                    </div>
+                 `).join('');
+                 bodyHtml += `<div class="grid grid-cols-8 gap-0 border-b last:border-b-0 border-gray-200 dark:border-gray-700"><div class="p-4 flex flex-col justify-center items-center text-center min-h-[100px] desktop-timetable-grid-cell"><div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div><div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div></div>${rowHtml}</div>`;
+             }
+             return `<div class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl overflow-hidden border border-gray-200/50 dark:border-gray-700/50 animate-pulse">
+                        <div class="grid grid-cols-8 gap-0 border-b border-gray-200 dark:border-gray-700">
+                            <div class="p-5 bg-gray-100 dark:bg-gray-700/50 h-[88px]"></div>
+                            ${data.days.map(() => `<div class="p-5 bg-gray-100 dark:bg-gray-700/50 h-[88px]"></div>`).join('')}
+                        </div>
+                        ${bodyHtml}
+                    </div>`;
+        }
+
 
         function renderCalendarView() {
             const now = state.selectedDate;
             calendarContainer.innerHTML = Calendar(now.getFullYear(), now.getMonth());
             attachCalendarEventListeners();
         }
-
-        function showLoading() {
-            state.isLoading = true;
-            requestAnimationFrame(() => {
-                timetableContainer.classList.add('hidden');
-                calendarContainer.classList.add('hidden');
-                loadingSkeleton.classList.remove('hidden');
-            });
-        }
-
-        function hideLoading() {
-            state.isLoading = false;
-            requestAnimationFrame(() => {
-                loadingSkeleton.classList.add('hidden');
-                if (state.view === 'timetable') timetableContainer.classList.remove('hidden');
-                else calendarContainer.classList.remove('hidden');
-            });
-        }
         
-        // --- UPDATED: Course Card with short codes ---
         function CourseCard({ slot, showTiming = false }) {
             if (slot.type === "BREAK" || slot.type === "LUNCH") {
                 return `<div class="h-18 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-medium shadow-sm"><span class="font-semibold">${slot.period}</span><span class="text-xs opacity-75">${slot.time}</span></div>`;
@@ -862,12 +968,12 @@
             }
 
             const course = courseData[slot.courseCode];
-            let colorClass = courseColors[slot.courseCode] || "bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200";
+            let colorClass = courseColors[slot.courseCode] || "bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300 text-gray-800 dark:from-gray-800 dark:to-gray-700 dark:border-gray-600 dark:text-gray-200";
 
             return `
                 <div class="h-18 cursor-pointer transition-all duration-300 border-2 ${colorClass} rounded-xl hover-lift group course-card-mobile-interactive" data-course-code="${slot.courseCode}"
-                     onclick="openModalWithFeedback('${slot.courseCode}', '${slot.room}')">
-                    <div class="p-3 h-full flex flex-col justify-between">
+                     onclick="openModalWithFeedback(event, '${slot.courseCode}', '${slot.room}')">
+                    <div class="course-card-content p-3 h-full flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <div class="flex items-baseline gap-2 overflow-hidden">
                                 <span class="text-sm">${getTypeIcon(course.type)}</span>
@@ -892,29 +998,28 @@
                 </div>`;
         }
 
-        // --- UPDATED: Mobile View with SVG icons ---
         function MobileView(data = timetableData) {
             const dayName = data.days[state.currentDay];
             const daySchedule = data.schedule[dayName] || [];
             const dayLabel = getDayLabel(state.currentDay);
             const isToday = getDayLabel(state.currentDay) === 'Today';
             
-            let animationClass = 'fade-in'; // Default
+            let animationClass = 'fade-in';
             if (state.transitionDirection === 'next') {
                 animationClass = 'schedule-slide-in-right';
             } else if (state.transitionDirection === 'prev') {
                 animationClass = 'schedule-slide-in-left';
             }
-            state.transitionDirection = 'none'; // Reset after use
+            state.transitionDirection = 'none';
 
             const daySwitcher = data.days.map((day, index) => {
                 const isCurrent = index === state.currentDay;
                 const isToday = index === getCurrentDayIndex();
-                const dayInitial = (day === "Thursday") ? "R" : day.charAt(0);
-                let buttonClasses = `w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 hover-lift ${isCurrent ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg' : 'bg-white/70 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 backdrop-blur-sm'}`;
+                const dayInitial = (day === "Thursday") ? "T" : day.charAt(0);
+                let buttonClasses = `w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 hover-lift button-press ${isCurrent ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg' : 'bg-white/70 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 backdrop-blur-sm'}`;
                 let todayIndicator = (isToday && !isCurrent) ? '<div class="absolute bottom-1.5 w-1.5 h-1.5 bg-green-500 rounded-full shadow-sm"></div>' : '';
 
-                return `<button onclick="setCurrentDayWithFeedback(${index})" class="relative ${buttonClasses}">${dayInitial}${todayIndicator}</button>`;
+                return `<button onclick="setCurrentDayWithFeedback(this, ${index})" class="relative ${buttonClasses}">${dayInitial}${todayIndicator}</button>`;
             }).join('');
 
             let scheduleHtml;
@@ -930,17 +1035,29 @@
                                 </div>`;
             } else {
                 scheduleHtml = daySchedule.map((slot, index) => {
+                    const electiveToExclude = state.selectedElective === 'CE23C11' ? 'CE23F14' : 'CE23C11';
+                    const isFiltered = slot.courseCode === electiveToExclude;
                     let completedClass = (isToday && isPeriodCompleted(slot)) ? 'period-completed' : '';
-                    return `<div class="flex items-start space-x-4 slide-in ${completedClass}" style="animation-delay: ${index * 0.1}s"><div class="w-24 text-right pt-3"><div class="text-sm font-bold text-gray-800 dark:text-gray-200">${typeof slot.period === "number" ? `Period ${slot.period}` : slot.period}</div><div class="text-xs text-gray-500 dark:text-gray-400 font-medium">${slot.time}</div></div><div class="flex-1">${CourseCard({ slot })}</div></div>`;
+                    return `<div class="course-card-wrapper ${isFiltered ? 'hiding' : ''}">
+                                <div class="course-card-container" style="animation-delay: ${index * 0.1}s">
+                                    <div class="flex items-start space-x-4 slide-in ${completedClass}">
+                                        <div class="w-24 text-right pt-3">
+                                            <div class="text-sm font-bold text-gray-800 dark:text-gray-200">${typeof slot.period === "number" ? `Period ${slot.period}` : slot.period}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">${slot.time}</div>
+                                        </div>
+                                        <div class="flex-1">${CourseCard({ slot })}</div>
+                                    </div>
+                                </div>
+                            </div>`;
                 }).join('');
             }
 
             return `
                 <div class="space-y-6">
                     <div class="flex items-center justify-between bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-lg p-5 border border-gray-200/50 dark:border-gray-700/50 mobile-header">
-                        <button id="prev-day-btn" class="p-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 hover-lift"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                        <button id="prev-day-btn" class="p-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 hover-lift button-press"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
                         <div class="text-center"><h2 class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">${dayName}</h2>${dayLabel ? `<span class="inline-flex items-center rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 px-3 py-1 text-xs font-semibold text-blue-700 dark:text-blue-300 mt-2 border border-blue-100 dark:border-gray-600">${dayLabel}</span>` : ''}</div>
-                        <button id="next-day-btn" class="p-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 hover-lift"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+                        <button id="next-day-btn" class="p-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 hover-lift button-press"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
                     </div>
                     <div class="flex justify-center space-x-1 sm:space-x-2">${daySwitcher}</div>
                     <div id="mobile-schedule" class="space-y-4 ${animationClass}">${scheduleHtml}</div>
@@ -967,9 +1084,17 @@
                  for (let i = 0; i < maxPeriods; i++) {
                     let rowHtml = data.days.map((day, dayIndex) => {
                         const slot = data.schedule[day][i];
+                        const electiveToExclude = state.selectedElective === 'CE23C11' ? 'CE23F14' : 'CE23C11';
+                        const isFiltered = slot && slot.courseCode === electiveToExclude;
                         const isToday = dayIndex === todayIndex;
                         let completedClass = (isToday && isPeriodCompleted(slot)) ? 'period-completed' : '';
-                        return `<div class="p-3 min-h-[100px] ${isToday ? "bg-blue-50/30 dark:bg-blue-900/10" : ""} ${completedClass} desktop-timetable-grid-cell">${slot ? CourseCard({ slot, showTiming: true }) : `<div class="h-18 w-full cursor-default opacity-50"></div>`}</div>`;
+                        return `<div class="p-3 min-h-[100px] ${isToday ? "bg-blue-50/30 dark:bg-blue-900/10" : ""} ${completedClass} desktop-timetable-grid-cell">
+                                    <div class="course-card-wrapper ${isFiltered ? 'hiding' : ''}">
+                                        <div class="course-card-container">
+                                            ${slot ? CourseCard({ slot, showTiming: true }) : `<div class="h-18 w-full cursor-default opacity-50"></div>`}
+                                        </div>
+                                    </div>
+                                </div>`;
                     }).join('');
                     let currentSlotForPeriod = Object.values(data.schedule).map(d => d[i]).find(s => s);
                     bodyHtml += `<div class="grid grid-cols-8 gap-0 border-b last:border-b-0 border-gray-200 dark:border-gray-700"><div class="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 flex flex-col justify-center items-center text-center min-h-[100px] desktop-timetable-grid-cell desktop-timetable-header-cell"><div class="text-sm font-bold text-gray-800 dark:text-gray-200">${currentSlotForPeriod ? (typeof currentSlotForPeriod.period === "number" ? `Period ${currentSlotForPeriod.period}` : currentSlotForPeriod.period) : `Period ${i+1}`}</div><div class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">${currentSlotForPeriod ? currentSlotForPeriod.time : ''}</div></div>${rowHtml}</div>`;
@@ -995,8 +1120,12 @@
             }
 
             if (state.isMobile) {
-                document.getElementById('prev-day-btn')?.addEventListener('click', () => { triggerHapticFeedback(); setCurrentDay((state.currentDay - 1 + 7) % 7); });
-                document.getElementById('next-day-btn')?.addEventListener('click', () => { triggerHapticFeedback(); setCurrentDay((state.currentDay + 1) % 7); });
+                document.getElementById('prev-day-btn')?.addEventListener('click', (e) => { 
+                    handleButtonPress(e.currentTarget, () => setCurrentDay((state.currentDay - 1 + 7) % 7));
+                });
+                document.getElementById('next-day-btn')?.addEventListener('click', (e) => { 
+                    handleButtonPress(e.currentTarget, () => setCurrentDay((state.currentDay + 1) % 7));
+                });
                 const scheduleEl = document.getElementById('mobile-schedule');
                 if (scheduleEl) {
                     scheduleEl.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -1021,28 +1150,24 @@
         function handleTouchStart(e) { state.touchEnd = null; state.touchStart = e.targetTouches[0].clientX; }
         function handleTouchMove(e) { state.touchEnd = e.targetTouches[0].clientX; }
         
-        // --- UPDATED: handleTouchEnd with haptic feedback ---
         let lastSwipeTime = 0;
         function handleTouchEnd() {
             const now = Date.now();
-            if (now - lastSwipeTime < 250) return; // Throttle swipes
+            if (now - lastSwipeTime < 250) return;
             lastSwipeTime = now;
             if (!state.touchStart || !state.touchEnd) return;
             const distance = state.touchStart - state.touchEnd;
-            const swipeThreshold = 50; // Minimum distance for a swipe
+            const swipeThreshold = 50;
 
-            // Check for a swipe to the left (next day)
             if (distance > swipeThreshold) {
                 triggerHapticFeedback();
                 setCurrentDay((state.currentDay + 1) % 7);
             }
-            // Check for a swipe to the right (previous day)
             else if (distance < -swipeThreshold) {
                 triggerHapticFeedback();
                 setCurrentDay((state.currentDay - 1 + 7) % 7);
             }
 
-            // Reset touch coordinates
             state.touchStart = null;
             state.touchEnd = null;
         }
@@ -1062,20 +1187,31 @@
             requestAnimationFrame(render);
         }
 
-        function setCurrentDayWithFeedback(index) {
+        function handleButtonPress(element, callback) {
             triggerHapticFeedback();
-            setCurrentDay(index);
+            element.classList.add('pressed');
+            setTimeout(() => {
+                element.classList.remove('pressed');
+                if (callback) callback();
+            }, 150);
         }
 
-        // --- ENHANCED MODAL LOGIC ---
-        function openModalWithFeedback(courseCode, room) {
-            triggerHapticFeedback(10); // A slightly stronger feedback for modal open
-            openModal(courseCode, room);
+        function setCurrentDayWithFeedback(element, index) {
+            handleButtonPress(element, () => setCurrentDay(index));
         }
 
-        function openModal(courseCode, room) {
+        // --- ENHANCED MODAL LOGIC WITH ANIMATION ---
+        function openModalWithFeedback(event, courseCode, room) {
+            openModal(event.currentTarget, courseCode, room);
+        }
+
+        function openModal(cardElement, courseCode, room) {
+            if (!cardElement) return;
+            state.clickedCard = cardElement;
             const course = courseData[courseCode];
             if (!course) return;
+
+            const cardRect = cardElement.getBoundingClientRect();
 
             let scheduleEntries = [];
             timetableData.days.forEach(day => timetableData.schedule[day].forEach(slot => {
@@ -1084,25 +1220,71 @@
             const scheduleHtml = scheduleEntries.length > 0 ? scheduleEntries.map(entry => `<div class="flex justify-between items-center py-1.5 border-b border-gray-200 dark:border-gray-600/50 last:border-b-0"><span class="text-sm text-gray-600 dark:text-gray-400">${entry.day}</span><span class="text-sm font-semibold text-gray-800 dark:text-gray-200">${entry.time}</span></div>`).join('') : '<p class="text-sm text-gray-500 dark:text-gray-400">Not scheduled this week.</p>';
             const locationHtml = room ? `<p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1">${room}</p>` : '<p class="text-sm text-gray-500 dark:text-gray-400">No location assigned.</p>';
 
-            dialog.querySelector('.dialog-content').innerHTML = `
-                <button onclick="closeModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 hover:bg-gray-200/70 dark:hover:bg-gray-700/70 backdrop-blur-sm transition-all duration-200"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                <div class="p-4 sm:p-6 max-h-[85vh] overflow-y-auto">
-                    <div class="flex items-center gap-3 sm:gap-4 mb-6"><div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/40 rounded-2xl flex items-center justify-center flex-shrink-0 border border-purple-200 dark:border-purple-800"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600 dark:text-purple-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><div><h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">${courseCode}</h2><p class="text-base text-gray-500 dark:text-gray-400">${course.title}</p></div></div>
-                    <div class="space-y-3"><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Professor</p><p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1 truncate">${course.staff}</p></div><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Credits</p><p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1">${course.credits}</p></div><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</p><p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1 capitalize">${course.type}</p></div><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Staff Code</p><p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1">${course.staffCode}</p></div></div><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Schedule</p><div class="space-y-1 mt-2">${scheduleHtml}</div></div><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</p>${locationHtml}</div></div>
+            dialogContent.innerHTML = `
+                <div class="modal-content-wrapper">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 z-10 p-2 rounded-full text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 hover:bg-gray-200/70 dark:hover:bg-gray-700/70 backdrop-blur-sm transition-all duration-200 modal-anim-item"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                    <div class="p-4 sm:p-6 max-h-[85vh] overflow-y-auto">
+                        <div class="modal-anim-item flex items-center gap-3 sm:gap-4 mb-6"><div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/40 rounded-2xl flex items-center justify-center flex-shrink-0 border border-purple-200 dark:border-purple-800"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600 dark:text-purple-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><div><h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">${courseCode}</h2><p class="text-base text-gray-500 dark:text-gray-400">${course.title}</p></div></div>
+                        <div class="space-y-3"><div class="modal-anim-item grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Professor</p><p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1 truncate">${course.staff}</p></div><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Credits</p><p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1">${course.credits}</p></div><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</p><p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1 capitalize">${course.type}</p></div><div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Staff Code</p><p class="text-base font-bold text-gray-800 dark:text-gray-200 mt-1">${course.staffCode}</p></div></div><div class="modal-anim-item p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Schedule</p><div class="space-y-1 mt-2">${scheduleHtml}</div></div><div class="modal-anim-item p-4 bg-gray-100 dark:bg-gray-700/50 rounded-xl"><p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</p>${locationHtml}</div></div>
+                    </div>
                 </div>`;
 
+            cardElement.classList.add('course-card-animating');
+            
+            dialogContent.style.top = `${cardRect.top}px`;
+            dialogContent.style.left = `${cardRect.left}px`;
+            dialogContent.style.width = `${cardRect.width}px`;
+            dialogContent.style.height = `${cardRect.height}px`;
+            dialogContent.style.borderRadius = '0.75rem';
+            
             dialog.classList.add('open');
+
             requestAnimationFrame(() => {
-                dialog.classList.add('visible');
+                const finalWidth = Math.min(window.innerWidth * 0.9, 448);
+                dialogContent.style.top = '50%';
+                dialogContent.style.left = '50%';
+                dialogContent.style.width = `${finalWidth}px`;
+                dialogContent.style.height = 'auto';
+                dialogContent.style.transform = 'translate(-50%, -50%)';
+                dialogContent.style.borderRadius = '1.5rem';
+                
+                dialogContent.addEventListener('transitionend', () => {
+                    const items = dialogContent.querySelectorAll('.modal-anim-item');
+                    items.forEach((item, index) => {
+                        setTimeout(() => {
+                            item.classList.add('visible');
+                        }, index * 60);
+                    });
+                }, { once: true });
             });
         }
 
         function closeModal() {
-            dialog.classList.remove('visible');
-            setTimeout(() => dialog.classList.remove('open'), 200);
+            if (!state.clickedCard) return;
+
+            const cardRect = state.clickedCard.getBoundingClientRect();
+            
+            dialogContent.querySelectorAll('.modal-anim-item').forEach(item => item.classList.remove('visible'));
+
+            setTimeout(() => {
+                dialogContent.style.top = `${cardRect.top}px`;
+                dialogContent.style.left = `${cardRect.left}px`;
+                dialogContent.style.width = `${cardRect.width}px`;
+                dialogContent.style.height = `${cardRect.height}px`;
+                dialogContent.style.transform = 'translate(0, 0)';
+                dialogContent.style.borderRadius = '0.75rem';
+                
+                dialog.classList.remove('open');
+
+                dialogContent.addEventListener('transitionend', () => {
+                    state.clickedCard.classList.remove('course-card-animating');
+                    state.clickedCard = null;
+                    dialogContent.innerHTML = '';
+                }, { once: true });
+            }, 100);
         }
 
-        // --- UPDATED: PWA INSTALLATION LOGIC WITH BANNER & NAV BUTTON ---
+        // --- PWA INSTALLATION LOGIC ---
         let deferredPrompt;
         function setupPwaInstall() {
             const installBanner = document.getElementById('pwa-install-banner');
@@ -1110,57 +1292,38 @@
             const navInstallBtn = document.getElementById('nav-install-pwa-btn');
             const closeBannerBtn = document.getElementById('close-pwa-banner-btn');
 
-            // Function to handle the installation process
             const performInstall = async () => {
                 if (!deferredPrompt) return;
-                
-                // Hide both install prompts
                 installBanner?.classList.add('hidden');
                 navInstallBtn?.classList.add('hidden');
-
-                // Show the install prompt
                 deferredPrompt.prompt();
-                
-                // Wait for the user to respond to the prompt
                 await deferredPrompt.userChoice;
-                
-                // We've used the prompt, and can't use it again, throw it away
                 deferredPrompt = null;
             };
 
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-
-                // Show banner only if it hasn't been dismissed in this session
                 if (!sessionStorage.getItem('pwaBannerClosed')) {
                     installBanner?.classList.remove('hidden');
                     installBanner?.classList.add('fade-in');
                 } else {
-                    // If banner was already closed, show the nav button immediately
                     navInstallBtn?.classList.remove('hidden');
                 }
             });
 
-            // Listener for the banner's install button
             bannerInstallBtn?.addEventListener('click', performInstall);
-
-            // Listener for the nav bar install button
             navInstallBtn?.addEventListener('click', performInstall);
 
-            // Listener for closing the banner
             closeBannerBtn?.addEventListener('click', () => {
                 installBanner.classList.add('hidden');
                 sessionStorage.setItem('pwaBannerClosed', 'true');
-                
-                // Show the nav bar button as a fallback if the app is not installed yet
                 if (deferredPrompt) {
                     navInstallBtn?.classList.remove('hidden');
                 }
             });
 
             window.addEventListener('appinstalled', () => {
-                // Hide all install UI
                 installBanner?.classList.add('hidden');
                 navInstallBtn?.classList.add('hidden');
                 deferredPrompt = null;
@@ -1170,16 +1333,23 @@
         // --- ELECTIVE & VIEW MANAGEMENT ---
         function setupControls() {
             document.getElementById('elective-selector')?.querySelectorAll('.segmented-option').forEach(option => {
-                option.addEventListener('click', () => {
+                option.addEventListener('click', (e) => {
                     const value = option.getAttribute('data-value');
-                    if (value !== state.selectedElective) setSelectedElective(value);
+                    handleButtonPress(e.currentTarget, () => {
+                         if (value !== state.selectedElective) setSelectedElective(value);
+                    });
                 });
             });
             document.getElementById('view-switcher')?.addEventListener('click', (e) => {
-                const view = e.target.closest('button')?.dataset.view;
-                if (view && view !== state.view) {
-                    state.view = view;
-                    render();
+                const button = e.target.closest('button');
+                if (button) {
+                    const view = button.dataset.view;
+                    handleButtonPress(button, () => {
+                        if (view && view !== state.view) {
+                            state.view = view;
+                            render();
+                        }
+                    });
                 }
             });
         }
@@ -1200,15 +1370,6 @@
             });
         }
         
-        function getFilteredTimetableData() {
-            const filtered = { days: timetableData.days, schedule: {} };
-            const electiveToExclude = state.selectedElective === 'CE23C11' ? 'CE23F14' : 'CE23C11';
-            timetableData.days.forEach(day => {
-                filtered.schedule[day] = (timetableData.schedule[day] || []).filter(slot => slot.courseCode !== electiveToExclude);
-            });
-            return filtered;
-        }
-
         function updateViewSwitcher() {
             const switcher = document.getElementById('view-switcher');
             if (!switcher) return;
@@ -1226,7 +1387,7 @@
             const today = new Date();
             const selected = state.selectedDate;
 
-            let header = `<div class="flex items-center justify-between mb-4"><button id="prev-month" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><h3 class="text-lg font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-500">${monthNames[month]} ${year}</h3><button id="next-month" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button></div>`;
+            let header = `<div class="flex items-center justify-between mb-4"><button id="prev-month" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 button-press"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><h3 class="text-lg font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-500">${monthNames[month]} ${year}</h3><button id="next-month" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 button-press"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button></div>`;
             let dayLabels = daysOfWeek.map(day => `<div class="text-center font-semibold text-xs text-gray-500 dark:text-gray-400">${day}</div>`).join('');
             let calendarDays = Array(startDayIndex).fill('<div></div>').join('');
 
@@ -1236,7 +1397,7 @@
                 const isSelected = currentDate.toDateString() === selected.toDateString();
                 const dayOfWeekIndex = (currentDate.getDay() === 0) ? 6 : currentDate.getDay() - 1;
                 const hasSchedule = timetableData.schedule[timetableData.days[dayOfWeekIndex]]?.length > 0;
-                let dayClasses = `w-10 h-10 flex items-center justify-center text-center rounded-xl cursor-pointer transition-all duration-200 ${isToday ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold shadow-lg' : isSelected ? 'bg-purple-200 dark:bg-purple-700 text-purple-800 dark:text-white font-bold' : `hover:bg-blue-100 dark:hover:bg-blue-800/50 ${hasSchedule ? 'font-bold text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}`}`;
+                let dayClasses = `w-10 h-10 flex items-center justify-center text-center rounded-xl cursor-pointer transition-all duration-200 button-press ${isToday ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold shadow-lg' : isSelected ? 'bg-purple-200 dark:bg-purple-700 text-purple-800 dark:text-white font-bold' : `hover:bg-blue-100 dark:hover:bg-blue-800/50 ${hasSchedule ? 'font-bold text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}`}`;
                 calendarDays += `<div class="flex flex-col items-center justify-center h-12"><button data-day="${day}" class="${dayClasses}">${day}</button></div>`;
             }
 
@@ -1244,9 +1405,21 @@
         }
 
         function attachCalendarEventListeners() {
-            document.getElementById('prev-month')?.addEventListener('click', () => { state.selectedDate.setMonth(state.selectedDate.getMonth() - 1); renderCalendarView(); });
-            document.getElementById('next-month')?.addEventListener('click', () => { state.selectedDate.setMonth(state.selectedDate.getMonth() + 1); renderCalendarView(); });
-            document.querySelectorAll('[data-day]').forEach(button => button.addEventListener('click', handleDateClick));
+            document.getElementById('prev-month')?.addEventListener('click', (e) => {
+                handleButtonPress(e.currentTarget, () => {
+                    state.selectedDate.setMonth(state.selectedDate.getMonth() - 1); 
+                    renderCalendarView();
+                });
+            });
+            document.getElementById('next-month')?.addEventListener('click', (e) => {
+                handleButtonPress(e.currentTarget, () => {
+                    state.selectedDate.setMonth(state.selectedDate.getMonth() + 1); 
+                    renderCalendarView();
+                });
+            });
+            document.querySelectorAll('[data-day]').forEach(button => {
+                button.addEventListener('click', (e) => handleButtonPress(e.currentTarget, () => handleDateClick(e)));
+            });
         }
 
         function handleDateClick(e) {
@@ -1257,6 +1430,17 @@
             state.view = 'timetable';
             render();
         }
+
+        // --- CHANGE: OFFLINE STATUS LOGIC ---
+        function updateOnlineStatus() {
+            const offlinePill = document.getElementById('offline-status');
+            if (navigator.onLine) {
+                offlinePill.classList.remove('visible');
+            } else {
+                offlinePill.classList.add('visible');
+            }
+        }
+
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -1274,7 +1458,19 @@
             
             document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
             
-            render();
+            // Initial render with skeleton
+            render(); 
+            
+            // After a short delay, render the actual content
+            setTimeout(() => {
+                state.isLoading = false;
+                render();
+            }, 300); // Delay to allow skeleton to be visible
+
+            // Listen for online/offline status changes
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus(); // Initial check
         });
 
         window.addEventListener('resize', handleResize);
@@ -1283,19 +1479,45 @@
     <script>
         function registerServiceWorker() {
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker registered.', reg))
-                    .catch(err => console.error('Service Worker registration failed:', err));
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('Service Worker registered');
 
-                // Listen for messages from the service worker for page reload
-                navigator.serviceWorker.addEventListener('message', event => {
-                    if (event.data && event.data.type === 'RELOAD_PAGE') {
-                        console.log('New content available, reloading...');
-                        window.location.reload();
+                    if (registration.waiting) {
+                        showUpdateNotification(registration.waiting);
+                        return;
                     }
+
+                    registration.onupdatefound = () => {
+                        const newWorker = registration.installing;
+                        newWorker.onstatechange = () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateNotification(newWorker);
+                            }
+                        };
+                    };
                 });
+
+                let refreshing;
+                navigator.serviceWorker.oncontrollerchange = () => {
+                    if (refreshing) return;
+                    window.location.reload();
+                    refreshing = true;
+                };
             }
         }
+
+        function showUpdateNotification(worker) {
+            const notification = document.getElementById('update-notification');
+            const reloadButton = document.getElementById('reload-button');
+
+            reloadButton.addEventListener('click', () => {
+                worker.postMessage({ type: 'SKIP_WAITING' });
+            });
+            
+            notification.classList.remove('hidden');
+            setTimeout(() => notification.classList.remove('translate-y-20'), 100);
+        }
+        
         registerServiceWorker();
     </script>
     <script src="data.js"></script>

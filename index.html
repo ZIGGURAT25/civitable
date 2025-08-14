@@ -41,7 +41,7 @@
             background: rgba(75, 85, 99, 0.5);
         }
 
-        /* --- MODAL/DIALOG STYLES FOR ANIMATION --- */
+        /* --- MODAL/DIALOG STYLES (OPTIMIZED) --- */
         .dialog-backdrop {
             position: fixed;
             inset: 0;
@@ -62,9 +62,14 @@
             width: 90%;
             max-width: 28rem;
             opacity: 0;
-            transition: all 350ms cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: opacity, transform, width, height, border-radius;
+            /* CHANGE: Transitioning only transform and opacity for performance */
+            transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: opacity, transform;
             overflow: hidden;
+            /* Set initial position off-screen for transform */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
         }
         .dark .dialog-content {
             background-color: rgb(31, 41, 55);
@@ -80,8 +85,10 @@
             opacity: 1;
         }
         
+        /* CHANGE: Simplified open state for dialog content */
         .dialog.open .dialog-content {
             opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
         }
         
         .course-card-animating {
@@ -107,9 +114,10 @@
              transform: scale(0.95);
         }
 
-        /* --- ANIMATED STATE TRANSITIONS FOR FILTERING --- */
+        /* --- ANIMATED STATE TRANSITIONS FOR FILTERING (OPTIMIZED) --- */
         .course-card-wrapper {
-            transition: max-height 0.35s ease-in-out, margin-top 0.35s ease-in-out, margin-bottom 0.35s ease-in-out;
+            /* CHANGE: Removed transition from max-height for better performance */
+            transition: margin-top 0.35s ease-in-out, margin-bottom 0.35s ease-in-out;
             overflow: hidden;
             max-height: 150px; /* Needs to be larger than the card's actual height */
         }
@@ -119,13 +127,13 @@
             margin-bottom: 0 !important;
         }
         .course-card-container {
+            /* This part of the animation is performant (transform, opacity) */
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
         .course-card-wrapper.hiding .course-card-container {
             transform: scale(0.9);
             opacity: 0;
         }
-
 
         /* --- CROSS-FADE MODAL ANIMATION --- */
         .course-card-content, .modal-content-wrapper {
@@ -142,24 +150,14 @@
             transition-delay: 0.15s; /* Delay fade-in until modal is mostly expanded */
         }
 
-
         /* Enhanced animations */
         .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
+            animation: fadeIn 0.4s ease-in-out forwards;
         }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        .slide-in {
-            animation: slideIn 0.4s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
         }
 
         /* Notification styles */
@@ -178,7 +176,7 @@
             transform: translateX(0);
         }
 
-        /* --- CHANGE: Enhanced hover effects with glow --- */
+        /* Enhanced hover effects with glow */
         .hover-lift {
             transition: all 0.2s ease-in-out;
             will-change: transform, box-shadow;
@@ -193,7 +191,7 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 20px rgba(96, 165, 250, 0.5);
         }
 
-        /* --- CHANGE: Optimized Skeleton Loading --- */
+        /* Optimized Skeleton Loading */
         .skeleton-card {
             background-color: #e5e7eb;
             border-radius: 0.75rem;
@@ -304,7 +302,7 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
-        /* --- NEW: Mobile UX/UI Polish --- */
+        /* Mobile UX/UI Polish */
         @media (max-width: 768px) {
             .mobile-header {
                 margin: 0.5rem;
@@ -337,20 +335,20 @@
             }
         }
         
-        /* --- NEW: Page transition animations for mobile day view --- */
+        /* --- CHANGE: Page transition animations for mobile day view (FASTER) --- */
         .schedule-slide-in-right {
-            animation: slideInFromRight 0.3s ease-out forwards;
+            animation: slideInFromRight 0.25s ease-out forwards;
         }
         .schedule-slide-in-left {
-            animation: slideInFromLeft 0.3s ease-out forwards;
+            animation: slideInFromLeft 0.25s ease-out forwards;
         }
 
         @keyframes slideInFromRight {
-            from { transform: translateX(50px); opacity: 0; }
+            from { transform: translateX(40px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
         @keyframes slideInFromLeft {
-            from { transform: translateX(-50px); opacity: 0; }
+            from { transform: translateX(-40px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
 
@@ -414,7 +412,7 @@
             100% { background: rgba(59, 130, 246, 0.1); }
         }
 
-        /* --- NEW Themed View Switcher styles --- */
+        /* Themed View Switcher styles */
         #view-switcher {
             position: relative;
             background: rgba(255, 255, 255, 0.7);
@@ -471,43 +469,42 @@
             color: white;
         }
       html, body {
-    overflow-x: hidden !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-  }
-  @media screen and (orientation:landscape) and (max-width: 768px) {
-    body::before {
-      content: 'Please rotate your device back to portrait mode.';
-      display: flex;
-      position: fixed;
-      z-index: 9999;
-      top: 0; left: 0; right: 0; bottom: 0;
-      justify-content: center;
-      align-items: center;
-      background: rgba(0,0,0,0.85);
-      color: #fff;
-      font-size: 1.3rem;
-      text-align: center;
-    }
-    #app, #main-content-container, .fade-in, .mobile-header, #timetable-container, #calendar-container {
-      filter: blur(2px) grayscale(0.6);
-      pointer-events: none;
-      user-select: none;
-    }
-  }
+        overflow-x: hidden !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+      }
+      @media screen and (orientation:landscape) and (max-width: 768px) {
+        body::before {
+          content: 'Please rotate your device back to portrait mode.';
+          display: flex;
+          position: fixed;
+          z-index: 9999;
+          top: 0; left: 0; right: 0; bottom: 0;
+          justify-content: center;
+          align-items: center;
+          background: rgba(0,0,0,0.85);
+          color: #fff;
+          font-size: 1.3rem;
+          text-align: center;
+        }
+        #app, #main-content-container, .fade-in, .mobile-header, #timetable-container, #calendar-container {
+          filter: blur(2px) grayscale(0.6);
+          pointer-events: none;
+          user-select: none;
+        }
+      }
 
-  /* --- CHANGE: OFFLINE STATUS PILL --- */
-  #offline-status {
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
-      transform: translateY(20px);
-      opacity: 0;
-      pointer-events: none;
-  }
-  #offline-status.visible {
-      transform: translateY(0);
-      opacity: 1;
-      pointer-events: auto;
-  }
+      #offline-status {
+          transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+          transform: translateY(20px);
+          opacity: 0;
+          pointer-events: none;
+      }
+      #offline-status.visible {
+          transform: translateY(0);
+          opacity: 1;
+          pointer-events: auto;
+      }
 
 </style>
   <base href="./">
@@ -517,7 +514,8 @@
     <nav class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-3 slide-in">
+                <!-- CHANGE: Removed slide-in animation for faster perceived load -->
+                <div class="flex items-center space-x-3">
                     <div class="bg-gradient-to-br from-blue-500 to-purple-600 p-2.5 rounded-xl shadow-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
@@ -533,7 +531,6 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
-                    <!-- CHANGE: OFFLINE STATUS PILL ADDED -->
                     <div id="offline-status" class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 bg-gray-200/50 dark:bg-gray-700/50 px-3 py-1.5 rounded-full">
                         <div class="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
                         <span class="font-semibold">Offline</span>
@@ -600,7 +597,7 @@
                 </div>
             </div>
 
-            <div class="flex flex-col items-center my-8 fade-in">
+            <div class="flex flex-col items-center my-8 fade-in" style="animation-delay: 0.1s;">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="p-2 bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600 dark:text-purple-400">
@@ -630,7 +627,7 @@
                 </div>
             </div>
             
-            <div class="flex justify-center mb-8 fade-in">
+            <div class="flex justify-center mb-8 fade-in" style="animation-delay: 0.2s;">
                 <div id="view-switcher" class="w-full max-w-md shadow-lg" data-view="timetable">
                     <button data-view="timetable" class="active button-press">Timetable</button>
                     <button data-view="calendar" class="button-press">Calendar</button>
@@ -886,7 +883,6 @@
         function renderTimetableView() {
             const data = { days: timetableData.days, schedule: timetableData.schedule };
             
-            // CHANGE: Optimized Skeleton Loading
             if (state.isLoading) {
                 if (state.isMobile) {
                     timetableContainer.innerHTML = MobileSkeletonView(data);
@@ -903,7 +899,6 @@
             }
         }
 
-        // --- CHANGE: New Skeleton View Functions ---
         function MobileSkeletonView(data) {
             const dayName = data.days[state.currentDay];
             const daySchedule = data.schedule[dayName] || [];
@@ -1040,7 +1035,7 @@
                     let completedClass = (isToday && isPeriodCompleted(slot)) ? 'period-completed' : '';
                     return `<div class="course-card-wrapper ${isFiltered ? 'hiding' : ''}">
                                 <div class="course-card-container" style="animation-delay: ${index * 0.1}s">
-                                    <div class="flex items-start space-x-4 slide-in ${completedClass}">
+                                    <div class="flex items-start space-x-4 fade-in ${completedClass}">
                                         <div class="w-24 text-right pt-3">
                                             <div class="text-sm font-bold text-gray-800 dark:text-gray-200">${typeof slot.period === "number" ? `Period ${slot.period}` : slot.period}</div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">${slot.time}</div>
@@ -1200,7 +1195,7 @@
             handleButtonPress(element, () => setCurrentDay(index));
         }
 
-        // --- ENHANCED MODAL LOGIC WITH ANIMATION ---
+        // --- OPTIMIZED MODAL LOGIC WITH TRANSFORM ANIMATION ---
         function openModalWithFeedback(event, courseCode, room) {
             openModal(event.currentTarget, courseCode, room);
         }
@@ -1210,8 +1205,6 @@
             state.clickedCard = cardElement;
             const course = courseData[courseCode];
             if (!course) return;
-
-            const cardRect = cardElement.getBoundingClientRect();
 
             let scheduleEntries = [];
             timetableData.days.forEach(day => timetableData.schedule[day].forEach(slot => {
@@ -1231,55 +1224,36 @@
 
             cardElement.classList.add('course-card-animating');
             
-            dialogContent.style.top = `${cardRect.top}px`;
-            dialogContent.style.left = `${cardRect.left}px`;
-            dialogContent.style.width = `${cardRect.width}px`;
-            dialogContent.style.height = `${cardRect.height}px`;
-            dialogContent.style.borderRadius = '0.75rem';
-            
+            // The dialog is already centered with a scale(0.95) transform.
+            // We just need to open it.
             dialog.classList.add('open');
-
-            requestAnimationFrame(() => {
-                const finalWidth = Math.min(window.innerWidth * 0.9, 448);
-                dialogContent.style.top = '50%';
-                dialogContent.style.left = '50%';
-                dialogContent.style.width = `${finalWidth}px`;
-                dialogContent.style.height = 'auto';
-                dialogContent.style.transform = 'translate(-50%, -50%)';
-                dialogContent.style.borderRadius = '1.5rem';
-                
-                dialogContent.addEventListener('transitionend', () => {
-                    const items = dialogContent.querySelectorAll('.modal-anim-item');
-                    items.forEach((item, index) => {
-                        setTimeout(() => {
-                            item.classList.add('visible');
-                        }, index * 60);
-                    });
-                }, { once: true });
-            });
+            
+            // Stagger the content animation
+            dialogContent.addEventListener('transitionend', () => {
+                const items = dialogContent.querySelectorAll('.modal-anim-item');
+                items.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.classList.add('visible');
+                    }, index * 60);
+                });
+            }, { once: true });
         }
 
         function closeModal() {
             if (!state.clickedCard) return;
-
-            const cardRect = state.clickedCard.getBoundingClientRect();
             
             dialogContent.querySelectorAll('.modal-anim-item').forEach(item => item.classList.remove('visible'));
 
             setTimeout(() => {
-                dialogContent.style.top = `${cardRect.top}px`;
-                dialogContent.style.left = `${cardRect.left}px`;
-                dialogContent.style.width = `${cardRect.width}px`;
-                dialogContent.style.height = `${cardRect.height}px`;
-                dialogContent.style.transform = 'translate(0, 0)';
-                dialogContent.style.borderRadius = '0.75rem';
-                
+                // The CSS transition will automatically reverse the transform to scale(0.95)
                 dialog.classList.remove('open');
 
                 dialogContent.addEventListener('transitionend', () => {
-                    state.clickedCard.classList.remove('course-card-animating');
-                    state.clickedCard = null;
-                    dialogContent.innerHTML = '';
+                    if (!dialog.classList.contains('open')) { // Ensure it's the closing transition
+                        state.clickedCard.classList.remove('course-card-animating');
+                        state.clickedCard = null;
+                        dialogContent.innerHTML = '';
+                    }
                 }, { once: true });
             }, 100);
         }
@@ -1431,7 +1405,6 @@
             render();
         }
 
-        // --- CHANGE: OFFLINE STATUS LOGIC ---
         function updateOnlineStatus() {
             const offlinePill = document.getElementById('offline-status');
             if (navigator.onLine) {
@@ -1458,19 +1431,16 @@
             
             document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
             
-            // Initial render with skeleton
             render(); 
             
-            // After a short delay, render the actual content
             setTimeout(() => {
                 state.isLoading = false;
                 render();
-            }, 300); // Delay to allow skeleton to be visible
+            }, 300);
 
-            // Listen for online/offline status changes
             window.addEventListener('online', updateOnlineStatus);
             window.addEventListener('offline', updateOnlineStatus);
-            updateOnlineStatus(); // Initial check
+            updateOnlineStatus();
         });
 
         window.addEventListener('resize', handleResize);

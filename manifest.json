@@ -1,9 +1,9 @@
 {
   "name": "CiviTable",
   "short_name": "CiviTable",
-  "start_url": "/civitable/",
+  "start_url": "./",
   "display": "standalone",
-  "scope": "/civitable/",
+  "scope": "./",
   "background_color": "#fff",
   "theme_color": "#333",
   "description": "A simple Time Table application for rec civil student of 3rd year.",

@@ -72,9 +72,7 @@ window.timetableData = {
             { period: 2, time: "9:00 AM - 9:50 AM", courseCode: "CE23613", room: "A202 (A Block)", batches: [1, 2] },
             { period: 3, time: "11:00 AM - 11:50 AM", courseCode: "CE23612", room: "A203 (A Block)", batches: [1, 2] },
             { period: 4, time: "11:50 AM - 1:20 PM", courseCode: "CE23631", room: "TLGL4 (Techlounge)", subType: "lab", batches: [2] }
-        ],
-        Saturday: [],
-        Sunday: []
+        ]
     }
 };
 

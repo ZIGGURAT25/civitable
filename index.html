@@ -55,17 +55,27 @@
 
         /* --- DIALOG --- */
         .dialog-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 50; backdrop-filter: blur(4px); }
+        
+        /* UPDATED DIALOG CONTENT */
         .dialog-content {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: white; border-top-left-radius: 24px; border-top-right-radius: 24px;
             padding: 24px; padding-bottom: env(safe-area-inset-bottom, 24px);
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            
+            transform: translate3d(0, 100%, 0); 
+            will-change: transform;
+            transition: transform 0.35s cubic-bezier(0.15, 0.8, 0.25, 1);
+            
             z-index: 51; pointer-events: none; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+            
+            /* CRITICAL FIXES FOR SMOOTH SCROLL */
+            touch-action: none; 
+            overscroll-behavior: contain;
         }
         .dark .dialog-content { background: #151515; border-top: 1px solid #333; }
 
         .dialog.open .dialog-backdrop { opacity: 1; pointer-events: auto; }
-        .dialog.open .dialog-content { transform: translateY(0); pointer-events: auto; }
+        .dialog.open .dialog-content { transform: translate3d(0, 0, 0); pointer-events: auto; }
 
         /* --- UTILS --- */
         .safe-pb { padding-bottom: calc(env(safe-area-inset-bottom, 24px) + 80px); }
@@ -113,7 +123,6 @@
                     <rect x="240" y="564" width="220" height="220" rx="48" fill="url(#orangeGrad)"/>
                     <rect x="564" y="564" width="220" height="220" rx="48" fill="url(#greenGrad)"/>
                 </svg>
-
                 <div>
                     <h1 class="text-xl font-black tracking-tight leading-none">CIVI<span class="text-blue-600 dark:text-blue-400">TABLE</span></h1>
                     <div class="flex items-center gap-1.5 mt-0.5">
@@ -127,7 +136,6 @@
                 <button id="install-btn" class="hidden px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-blue-500/30 transition-all btn-press">
                     Get App
                 </button>
-
                 <button id="theme-toggle" aria-label="Toggle Theme" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#222] flex items-center justify-center text-gray-600 dark:text-gray-300 btn-press transition-colors hover:bg-gray-200 dark:hover:bg-[#333]">
                     <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -137,21 +145,15 @@
     </nav>
 
     <main id="app" class="max-w-md mx-auto p-5 safe-pb">
-        
         <div class="flex items-end justify-between mb-2">
             <div>
                 <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Semester VI</p>
                 <h2 class="text-3xl font-black tracking-tight" id="header-date">Oct 24</h2>
             </div>
-            
-            <div class="flex bg-gray-200 dark:bg-[#222] rounded-xl p-1 hidden" id="batch-control">
-                </div>
+            <div class="flex bg-gray-200 dark:bg-[#222] rounded-xl p-1 hidden" id="batch-control"></div>
         </div>
-
         <div class="flex justify-between gap-2 mb-6 p-1" id="day-nav"></div>
-
         <div id="schedule-list" class="space-y-4"></div>
-
         <footer class="mt-12 mb-2 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-500 group">
             <p class="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                 Crafted with <span class="text-red-500 animate-pulse text-xs">❤</span> by
@@ -162,7 +164,6 @@
                 </span>
             </a>
         </footer>
-
     </main>
 
     <div id="modal" class="dialog">
@@ -207,7 +208,6 @@
 
     <script src="data.js"></script>
     <script>
-        // --- GLOBAL INSTALL HANDLER ---
         let globalDeferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -216,13 +216,9 @@
             if (btn) btn.classList.remove('hidden');
         });
 
-        // --- APP CONFIGURATION (UPDATED FOR BATCHES) ---
         const APP_CONFIG = {
             showToggle: true, 
-            toggleOptions: [
-                { code: 1, label: 'Batch 1' }, 
-                { code: 2, label: 'Batch 2' } 
-            ],
+            toggleOptions: [ { code: 1, label: 'Batch 1' }, { code: 2, label: 'Batch 2' } ],
             defaultSelection: 1
         };
 
@@ -237,7 +233,6 @@
 
         let state = {
             date: new Date(),
-            // Storing batch selection in local storage
             batch: parseInt(localStorage.getItem('selected_batch')) || APP_CONFIG.defaultSelection
         };
 
@@ -247,8 +242,78 @@
             render();
             updateLastUpdated();
             setupPWA();
+            setupGestures(); 
             setInterval(() => { render(); updateLastUpdated(); }, 60000); 
         });
+
+        // --- BUTTERY SMOOTH GESTURES (UPDATED) ---
+        function setupGestures() {
+            // 1. Horizontal Swipe
+            const app = document.getElementById('app');
+            let startX = 0, startY = 0;
+
+            app.addEventListener('touchstart', e => {
+                startX = e.changedTouches[0].screenX;
+                startY = e.changedTouches[0].screenY;
+            }, {passive: true});
+
+            app.addEventListener('touchend', e => {
+                const diffX = startX - e.changedTouches[0].screenX;
+                const diffY = startY - e.changedTouches[0].screenY;
+                if (Math.abs(diffX) > 60 && Math.abs(diffY) < 80) {
+                    const currentDayIdx = (state.date.getDay() === 0) ? 6 : state.date.getDay() - 1;
+                    if (diffX > 0) { if (currentDayIdx < 6) gotoDay(currentDayIdx + 1); }
+                    else { if (currentDayIdx > 0) gotoDay(currentDayIdx - 1); }
+                }
+            }, {passive: true});
+
+            // 2. Vertical Drag (rAF Optimization)
+            const modalContent = document.querySelector('.dialog-content');
+            let initialY = null;
+            let currentY = 0;
+            let animationFrame = null;
+
+            modalContent.addEventListener('touchstart', e => {
+                if (modalContent.scrollTop <= 0) {
+                    initialY = e.touches[0].clientY;
+                    modalContent.style.transition = 'none'; // Kill transition instantly
+                } else {
+                    initialY = null;
+                }
+            }, {passive: true});
+
+            modalContent.addEventListener('touchmove', e => {
+                if (initialY !== null) {
+                    const deltaY = e.touches[0].clientY - initialY;
+                    
+                    if (deltaY > 0) {
+                        e.preventDefault(); // Stop scrolling
+                        currentY = deltaY;
+
+                        // Use RequestAnimationFrame for sync
+                        if (!animationFrame) {
+                            animationFrame = requestAnimationFrame(() => {
+                                modalContent.style.transform = `translate3d(0, ${currentY}px, 0)`;
+                                animationFrame = null;
+                            });
+                        }
+                    }
+                }
+            }, {passive: false});
+
+            modalContent.addEventListener('touchend', e => {
+                if(animationFrame) cancelAnimationFrame(animationFrame);
+                modalContent.style.transition = 'transform 0.35s cubic-bezier(0.15, 0.8, 0.25, 1)';
+                
+                if (currentY > 120) {
+                    closeModal();
+                } else {
+                    modalContent.style.transform = 'translate3d(0, 0, 0)';
+                }
+                initialY = null;
+                currentY = 0;
+            }, {passive: true});
+        }
 
         function setupPWA() {
             const installBtn = document.getElementById('install-btn');
@@ -362,8 +427,6 @@
             }
 
             container.innerHTML = schedule.map((slot, idx) => {
-                // --- NEW BATCH FILTERING LOGIC ---
-                // If a slot has specific batches defined, and the current batch isn't in it, hide the slot.
                 if (slot.batches && !slot.batches.includes(state.batch)) {
                     return ''; 
                 }
@@ -384,7 +447,6 @@
                 const endTime = slot.time.split(' - ')[1].replace(' PM','').replace(' AM','');
                 const shortCode = course.shortCode || slot.courseCode.substring(0,2);
                 
-                // Optional: visual indicator for Lab
                 const isLab = slot.subType === 'lab';
                 const subTypeBadge = isLab ? `<span class="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">LAB</span>` : '';
 
@@ -433,7 +495,6 @@
             const theme = colorMap[code] || colorMap.DEFAULT;
             let schedHtml = '';
             
-            // Note: Modal still shows all slots for the course, generic view
             timetableData.days.forEach(d => {
                 (timetableData.schedule[d]||[]).forEach(s => {
                     if(s.courseCode === code) schedHtml += `<div class="flex justify-between items-center py-2.5 border-b border-gray-100 dark:border-[#222] last:border-0 text-xs"><span class="font-bold text-gray-500 uppercase tracking-wide">${d.substring(0,3)}</span><span class="font-bold text-gray-900 dark:text-gray-200">${s.time}</span></div>`;
@@ -454,10 +515,18 @@
                 </div>
                 <div class="bg-gray-50 dark:bg-[#111] border border-gray-100 dark:border-[#222] rounded-xl p-5"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Weekly Schedule</div>${schedHtml}</div>`;
             modal.classList.add('open');
+            modal.querySelector('.dialog-content').style.transform = '';
             if(navigator.vibrate) navigator.vibrate(10);
         }
 
-        function closeModal() { document.getElementById('modal').classList.remove('open'); }
+        function closeModal() { 
+            const modal = document.getElementById('modal');
+            modal.classList.remove('open'); 
+            setTimeout(() => {
+                const content = modal.querySelector('.dialog-content');
+                if(content) content.style.transform = '';
+            }, 300);
+        }
         function closeIOSModal() { document.getElementById('ios-install-modal').classList.remove('open'); }
 
         function initTheme() {

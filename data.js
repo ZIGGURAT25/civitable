@@ -32,8 +32,8 @@ window.courseData = {
         type: "lot"
     },
     "CE23632": {
-        title: "Professional Elective II",
-        shortCode: "PE-II",
+        title: "Design Thinking andInnovation",
+        shortCode: "DTI",
         staff: "Jeya Arthi A J",
         staffCode: "CE_JA",
         credits: "3",
@@ -55,8 +55,8 @@ window.timetableData = {
         Tuesday: [
             { period: 1, time: "11:00 AM - 11:50 AM", courseCode: "CE23612", room: "A108 (A Block)", batches: [1, 2] },
             { period: 2, time: "12:00 PM - 12:50 PM", courseCode: "CE23611", room: "A309 (A Block)", batches: [1, 2] },
-            { period: 3, time: "3:00 PM - 3:50 PM", courseCode: "CE23632", room: "A309 (A Block)", batches: [1, 2] },
-            { period: 4, time: "4:00 PM - 4:50 PM", courseCode: "CE23632", room: "A309 (A Block)", batches: [1, 2] }
+            { period: 3, time: "3:00 PM - 3:50 PM", courseCode: "CE23632", room: "A309 (A Block)",  subType: "lab",batches: [1, 2] },
+            { period: 4, time: "4:00 PM - 4:50 PM", courseCode: "CE23632", room: "A309 (A Block)",  subType: "lab",batches: [1, 2] }
         ],
         Wednesday: [
             { period: 1, time: "08:00 AM - 09:40 AM", courseCode: "CE23631", room: "JR2", subType: "lab", batches: [1] },
@@ -64,15 +64,17 @@ window.timetableData = {
         ],
         Thursday: [
             { period: 1, time: "1:20 PM - 2:10 PM", courseCode: "CE23611", room: "A108 (A Block)", batches: [1, 2] },
-            { period: 2, time: "3:00 PM - 3:50 PM", courseCode: "CE23632", room: "A203 (A Block)", batches: [1, 2] },
-            { period: 3, time: "4:00 PM - 4:50 PM", courseCode: "CE23632", room: "A203 (A Block)", batches: [1, 2] }
+            { period: 2, time: "3:00 PM - 3:50 PM", courseCode: "CE23632", room: "A203 (A Block)",  subType: "lab",batches: [1, 2] },
+            { period: 3, time: "4:00 PM - 4:50 PM", courseCode: "CE23632", room: "A203 (A Block)",  subType: "lab",batches: [1, 2] }
         ],
         Friday: [
             { period: 1, time: "8:00 AM - 8:50 AM", courseCode: "CE23631", room: "A303 (A Block)", batches: [1, 2] },
             { period: 2, time: "9:00 AM - 9:50 AM", courseCode: "CE23613", room: "A202 (A Block)", batches: [1, 2] },
             { period: 3, time: "11:00 AM - 11:50 AM", courseCode: "CE23612", room: "A203 (A Block)", batches: [1, 2] },
             { period: 4, time: "11:50 AM - 1:20 PM", courseCode: "CE23631", room: "TLGL4 (Techlounge)", subType: "lab", batches: [2] }
-        ]
+        ],
+        Saturday: [],
+        Sunday: []
     }
 };
 

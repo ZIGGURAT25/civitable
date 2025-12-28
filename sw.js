@@ -7,23 +7,23 @@
 importScripts('workbox-915e8d08.js');
 
 // --- VERSIONING ---
-// Updated to force the new CSS changes to load
-const APP_VERSION = 'v1.2.0-offline-css';
+// Bumped version to force cache clearing of the old logic
+const APP_VERSION = 'v1.3.0-data-fix';
 const RUNTIME_CACHE = `civi-runtime-${APP_VERSION}`;
 const CORE_CACHE = `civi-core-${APP_VERSION}`;
 
 // --- CORE ASSETS ---
-// Files to cache immediately so the app works offline.
+// Files to cache immediately so the app shell works offline.
+// NOTE: Removed './data.js' from here so it can update dynamically via NetworkFirst below.
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './data.js',
   './sw.js',
   './workbox-915e8d08.js',
   './images/icon-192x192.png',
   './images/icon-512x512.png',
-  './dist/styles.css' // <--- Now serving local styles!
+  './dist/styles.css'
 ];
 
 // --- Core Workbox Settings ---
@@ -52,14 +52,17 @@ self.addEventListener('install', (event) => {
 });
 
 // --- 2. Cleanup Old Caches ---
+// This runs when the new Service Worker activates.
+// It deletes ANY cache that doesn't match the current APP_VERSION.
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       const cacheNames = await caches.keys();
       await Promise.all(
         cacheNames.map((cn) => {
-          // Delete old caches that don't match the current version
-          if (!cn.includes(APP_VERSION) && (cn.startsWith('civi-core-') || cn.startsWith('civi-runtime-'))) {
+          // Delete caches that don't match the current version string
+          if (!cn.includes(APP_VERSION) && (cn.startsWith('civi-core-') || cn.startsWith('civi-runtime-') || cn.includes('civi-data-cache'))) {
+            console.log('[SW] Deleting old cache:', cn);
             return caches.delete(cn);
           }
         })
@@ -70,11 +73,20 @@ self.addEventListener('activate', (event) => {
 
 // --- 3. Dynamic Caching Strategies ---
 
-// A. Local Data (Fast updates)
+// A. DATA.JS (CRITICAL UPDATE)
+// Strategy: NetworkFirst
+// 1. Try to fetch from Network.
+// 2. If successful, update the cache and serve the new file.
+// 3. If offline/fails, serve the cached version.
 workbox.routing.registerRoute(
   ({url}) => url.pathname.endsWith('/data.js'),
-  new workbox.strategies.StaleWhileRevalidate({
-    cacheName: 'civi-data-cache',
+  new workbox.strategies.NetworkFirst({
+    cacheName: `civi-data-cache-${APP_VERSION}`, // Versioned data cache
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 1, // Only keep the latest version
+      }),
+    ],
   })
 );
 
@@ -113,7 +125,7 @@ workbox.routing.registerRoute(
 );
 
 // --- 4. Offline Fallback ---
-// If a navigation fails (e.g., offline), return index.html
+// If a navigation fails (e.g., offline and page not cached), return index.html
 const handler = async (options) => {
   try {
     return await fetch(options.request);

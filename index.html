@@ -9,7 +9,8 @@
     <meta name="description" content="CiviTable: Live-syncing timetable for Civil Engineering Semester VI.">
     <title>CiviTable</title>
     
-    <link rel="stylesheet" href="dist/styles.css">
+    <link rel="stylesheet" href="./dist/styles.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -82,6 +83,16 @@
         #update-toast.visible {
             transform: translateY(0);
         }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-gradient {
+            background-size: 200% auto;
+            animation: gradient 3s linear infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300 bg-dot-pattern">
@@ -133,7 +144,8 @@
                 <h2 class="text-3xl font-black tracking-tight" id="header-date">Oct 24</h2>
             </div>
             
-            <div class="flex bg-gray-200 dark:bg-[#222] rounded-xl p-1 hidden" id="elective-control"></div>
+            <div class="flex bg-gray-200 dark:bg-[#222] rounded-xl p-1 hidden" id="batch-control">
+                </div>
         </div>
 
         <div class="flex justify-between gap-2 mb-6 p-1" id="day-nav"></div>
@@ -204,11 +216,14 @@
             if (btn) btn.classList.remove('hidden');
         });
 
+        // --- APP CONFIGURATION (UPDATED FOR BATCHES) ---
         const APP_CONFIG = {
-            showToggle: false, 
-            toggleTitle: "Elective",
-            toggleOptions: [ { code: 'CE23632', label: 'PE-II' }, { code: 'BATCH_B', label: 'Batch B' } ],
-            defaultSelection: 'CE23632'
+            showToggle: true, 
+            toggleOptions: [
+                { code: 1, label: 'Batch 1' }, 
+                { code: 2, label: 'Batch 2' } 
+            ],
+            defaultSelection: 1
         };
 
         const colorMap = {
@@ -222,7 +237,8 @@
 
         let state = {
             date: new Date(),
-            elective: localStorage.getItem('selected_toggle') || APP_CONFIG.defaultSelection
+            // Storing batch selection in local storage
+            batch: parseInt(localStorage.getItem('selected_batch')) || APP_CONFIG.defaultSelection
         };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -297,12 +313,12 @@
         }
 
         function setupControls() {
-            const controlDiv = document.getElementById('elective-control');
+            const controlDiv = document.getElementById('batch-control');
             if (APP_CONFIG.showToggle) {
                 controlDiv.classList.remove('hidden');
                 controlDiv.innerHTML = APP_CONFIG.toggleOptions.map(opt => 
-                    `<button onclick="setElective('${opt.code}')" 
-                        class="px-4 py-2 rounded-lg text-xs font-bold transition-all btn-press ${state.elective === opt.code ? 'bg-white dark:bg-[#333] text-black dark:text-white shadow-sm' : 'text-gray-500'}" 
+                    `<button onclick="setBatch(${opt.code})" 
+                        class="px-4 py-2 rounded-lg text-xs font-bold transition-all btn-press ${state.batch === opt.code ? 'bg-white dark:bg-[#333] text-black dark:text-white shadow-sm' : 'text-gray-500'}" 
                         data-val="${opt.code}">${opt.label}</button>`
                 ).join('');
             } else {
@@ -311,7 +327,7 @@
         }
 
         function render() {
-            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
             const dayName = state.date.toLocaleDateString('en-US', { weekday: 'long' });
             
             document.getElementById('header-date').innerText = state.date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
@@ -346,9 +362,10 @@
             }
 
             container.innerHTML = schedule.map((slot, idx) => {
-                if (APP_CONFIG.showToggle) {
-                    const isOption = APP_CONFIG.toggleOptions.some(o => o.code === slot.courseCode);
-                    if (isOption && slot.courseCode !== state.elective) return ''; 
+                // --- NEW BATCH FILTERING LOGIC ---
+                // If a slot has specific batches defined, and the current batch isn't in it, hide the slot.
+                if (slot.batches && !slot.batches.includes(state.batch)) {
+                    return ''; 
                 }
 
                 if (slot.type === 'BREAK' || slot.type === 'LUNCH' || slot.type === 'FREE') {
@@ -366,9 +383,13 @@
                 const startTime = slot.time.split(' - ')[0];
                 const endTime = slot.time.split(' - ')[1].replace(' PM','').replace(' AM','');
                 const shortCode = course.shortCode || slot.courseCode.substring(0,2);
+                
+                // Optional: visual indicator for Lab
+                const isLab = slot.subType === 'lab';
+                const subTypeBadge = isLab ? `<span class="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">LAB</span>` : '';
 
                 return `
-                <div onclick="openModal('${slot.courseCode}')" class="group flex items-stretch h-22 ${theme.bg} rounded-2xl shadow-sm border border-gray-100 dark:border-[#222] border-l-[6px] ${theme.border} btn-press cursor-pointer card-enter relative overflow-hidden" style="animation-delay:${idx*0.05}s">
+                <div onclick="openModal('${slot.courseCode}')" class="group flex items-stretch h-22 ${theme.bg} rounded-2xl shadow-sm border border-gray-100 dark:border-[#333] border-l-[6px] ${theme.border} btn-press cursor-pointer card-enter relative overflow-hidden" style="animation-delay:${idx*0.05}s">
                     <div class="w-20 flex-shrink-0 flex flex-col justify-center items-center border-r border-gray-100 dark:border-[#222] bg-white/50 dark:bg-[#1a1a1a]/50">
                         <span class="font-bold text-sm text-gray-900 dark:text-white">${startTime}</span>
                         <span class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">${endTime}</span>
@@ -379,7 +400,7 @@
                         </div>
                         <div class="flex-1 min-w-0 flex flex-col justify-center">
                             <div class="flex justify-between items-center mb-1 gap-2">
-                                <h3 class="text-xs font-bold text-gray-900 dark:text-gray-100 truncate min-w-0">${slot.courseCode}</h3>
+                                <h3 class="text-xs font-bold text-gray-900 dark:text-gray-100 truncate min-w-0">${slot.courseCode}${subTypeBadge}</h3>
                                 <span class="px-2 py-0.5 rounded-md bg-white/60 dark:bg-[#222] text-[10px] font-bold text-gray-500 whitespace-nowrap flex-shrink-0">${slot.room || 'N/A'}</span>
                             </div>
                             <p class="text-[11px] font-medium leading-snug text-gray-600 dark:text-gray-400 truncate">${course.title || 'Course Details'}</p>
@@ -399,9 +420,9 @@
             if(navigator.vibrate) navigator.vibrate(5);
         }
 
-        function setElective(code) {
-            state.elective = code;
-            localStorage.setItem('selected_toggle', code);
+        function setBatch(code) {
+            state.batch = code;
+            localStorage.setItem('selected_batch', code);
             setupControls();
             render();
         }
@@ -411,6 +432,8 @@
             const modal = document.getElementById('modal');
             const theme = colorMap[code] || colorMap.DEFAULT;
             let schedHtml = '';
+            
+            // Note: Modal still shows all slots for the course, generic view
             timetableData.days.forEach(d => {
                 (timetableData.schedule[d]||[]).forEach(s => {
                     if(s.courseCode === code) schedHtml += `<div class="flex justify-between items-center py-2.5 border-b border-gray-100 dark:border-[#222] last:border-0 text-xs"><span class="font-bold text-gray-500 uppercase tracking-wide">${d.substring(0,3)}</span><span class="font-bold text-gray-900 dark:text-gray-200">${s.time}</span></div>`;
@@ -447,16 +470,5 @@
             });
         }
     </script>
-    <style>
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .animate-gradient {
-            background-size: 200% auto;
-            animation: gradient 3s linear infinite;
-        }
-    </style>
 </body>
 </html>

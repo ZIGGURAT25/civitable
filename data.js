@@ -32,7 +32,7 @@ window.courseData = {
         type: "lot"
     },
     "CE23632": {
-        title: "Design Thinking andInnovation",
+        title: "Design Thinking and Innovation",
         shortCode: "DTI",
         staff: "Jeya Arthi A J",
         staffCode: "CE_JA",
@@ -78,4 +78,4 @@ window.timetableData = {
     }
 };
 
-window.lastUpdatedDate = '2025-12-28T11:50:00';
+window.lastUpdatedDate = '2025-12-29T18:25:00';

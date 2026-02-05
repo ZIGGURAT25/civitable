@@ -63,8 +63,8 @@ window.timetableData = {
       { period: 2, time: "12:00 PM - 12:45 PM", courseCode: "CE23611", room: "B213" }
     ],
     Thursday: [
-      { period: 1, time: "1:20 PM - 2:05 PM", courseCode: "CE23631", room: "B213" },
-      { period: 2, time: "2:10 PM - 2:50 PM", courseCode: "CE23631", room: "B213" },
+      { period: 1, time: "1:20 PM - 2:05 PM", courseCode: "CE23631", room: "B213", subType: "lab" },
+      { period: 2, time: "2:10 PM - 2:50 PM", courseCode: "CE23631", room: "B213", subType: "lab" },
       { period: 3, time: "2:55 PM - 3:40 PM", courseCode: "CE23632", room: "B213" },
       { period: 4, time: "3:55 PM - 4:40 PM", courseCode: "CE23632", room: "B213" }
     ],

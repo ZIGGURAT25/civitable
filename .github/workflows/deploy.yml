@@ -4,11 +4,16 @@ on:
   push:
     branches:
       - main
-    # Optional: Only run this workflow if data.js or other source files change
     paths:
       - 'data.js'
       - 'src/**'
       - 'package.json'
+      - 'index.html'
+      - 'manifest.json'
+      - 'sw.js'
+      - '404.html'
+      - 'images/**'
+      - 'CNAME'
 
 permissions:
   contents: write
@@ -30,10 +35,19 @@ jobs:
         run: npm install
 
       - name: Build Project 🏗️
-        run: npm run build # 👈 Change this to whatever your build command is in package.json
+        run: npm run build
+
+      - name: Assemble Site Assets 📂
+        run: |
+          mkdir -p dist_site
+          cp -r index.html data.js manifest.json sw.js workbox-*.js 404.html dist_site/
+          cp -r images dist_site/
+          if [ -f CNAME ]; then cp CNAME dist_site/; fi
+          mkdir -p dist_site/dist
+          cp -r dist/styles.css dist_site/dist/
 
       - name: Deploy to GitHub Pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist # 👈 Change this to your output folder (e.g., dist, build, or public)
+          folder: dist_site
           branch: gh-pages

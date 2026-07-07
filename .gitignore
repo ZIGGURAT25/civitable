@@ -1,0 +1,29 @@
+# ── Node ────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Build artefacts ─────────────────────────────────────────────────────────
+# dist/styles.css is intentionally committed so GitHub Pages can serve it
+# without a separate build step on the host.
+# dist/
+
+# ── OS junk ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor / IDE ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Temporary / local ───────────────────────────────────────────────────────
+*.log
+*.tmp
+.env
+.env.local
+dist_site/
